@@ -57,9 +57,10 @@ export default function App() {
       const philipResponse = response.text || "I'm sorry, I couldn't formulate a response at this moment.";
       
       setMessages(prev => [...prev, { role: 'model', content: philipResponse }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'model', content: "I apologize, but I encountered an error while contemplating your question. Please try again." }]);
+      const errorMessage = error.message || "I apologize, but I encountered an error while contemplating your question.";
+      setMessages(prev => [...prev, { role: 'model', content: `**Error:** ${errorMessage}\n\nPlease ensure your API key is correctly set in Vercel and that the model is available for your account.` }]);
     } finally {
       setIsLoading(false);
     }

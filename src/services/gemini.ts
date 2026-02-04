@@ -17,13 +17,17 @@ When referencing recent literature (from the last two decades), try to be specif
 
 export async function askPhilip(message: string, history: { role: 'user' | 'model', parts: { text: string }[] }[] = []) {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("API Key is missing. Please check your Vercel Environment Variables.");
+    }
+
     // If it's the first message, prepend the context URLs to help the model ground itself
     const contextMessage = history.length === 0 
       ? `[Context: ${PHILIP_SWENSON_URL}, ${PHILPAPERS_URL}] ${message}` 
       : message;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash", // More stable for personal API keys
       contents: [
         ...history,
         { role: 'user', parts: [{ text: contextMessage }] }
@@ -31,15 +35,15 @@ export async function askPhilip(message: string, history: { role: 'user' | 'mode
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         tools: [
-          { urlContext: {} },
-          { googleSearch: {} }
+          { googleSearch: {} } // Standard grounding tool
         ],
       },
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling Gemini:", error);
-    throw error;
+    // Return a more descriptive error if possible
+    throw new Error(error.message || "An unknown error occurred while contacting the AI.");
   }
 }
