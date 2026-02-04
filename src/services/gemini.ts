@@ -27,16 +27,14 @@ export async function askPhilip(message: string, history: { role: 'user' | 'mode
       : message;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash", // More stable for personal API keys
+      model: "gemini-1.5-flash-latest", // Most universal alias for personal keys
       contents: [
         ...history,
         { role: 'user', parts: [{ text: contextMessage }] }
       ],
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        tools: [
-          { googleSearch: {} } // Standard grounding tool
-        ],
+        // Removing tools temporarily to isolate the connection issue
       },
     });
 
