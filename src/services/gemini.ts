@@ -29,7 +29,7 @@ export async function askPhilip(message: string, history: { role: 'user' | 'mode
       : message;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash", // Switching to the stable production model
       contents: [
         ...history,
         { role: 'user', parts: [{ text: contextMessage }] }
@@ -37,7 +37,7 @@ export async function askPhilip(message: string, history: { role: 'user' | 'mode
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         tools: [
-          { googleSearch: {} } // Re-enabling the "eyes" of the app
+          { googleSearch: {} }
         ],
       },
     });

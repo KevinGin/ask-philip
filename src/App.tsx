@@ -59,8 +59,14 @@ export default function App() {
       setMessages(prev => [...prev, { role: 'model', content: philipResponse }]);
     } catch (error: any) {
       console.error(error);
-      const errorMessage = error.message || "I apologize, but I encountered an error while contemplating your question.";
-      setMessages(prev => [...prev, { role: 'model', content: `**Error:** ${errorMessage}\n\nPlease ensure your API key is correctly set in Vercel and that the model is available for your account.` }]);
+      let errorMessage = error.message || "I apologize, but I encountered an error while contemplating your question.";
+      
+      // Friendly handling for Rate Limits (429)
+      if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+        errorMessage = "We're thinking a bit too fast for the free tier! Please wait about 30-60 seconds and try your question again. Philip's thoughts take a moment to process.";
+      }
+
+      setMessages(prev => [...prev, { role: 'model', content: `**Note:** ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }
