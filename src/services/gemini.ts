@@ -17,31 +17,34 @@ When referencing recent literature (from the last two decades), try to be specif
 
 export async function askPhilip(message: string, history: { role: 'user' | 'model', parts: { text: string }[] }[] = []) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("API Key is missing. Please check your Vercel Environment Variables.");
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey || apiKey === "undefined") {
+      throw new Error("API Key is missing or undefined in the browser. Please check your Vercel Environment Variables and ensure you redeployed after adding them.");
     }
 
-    // If it's the first message, prepend the context URLs to help the model ground itself
+    // If it's the first message, prepend the context URLs
     const contextMessage = history.length === 0 
       ? `[Context: ${PHILIP_SWENSON_URL}, ${PHILPAPERS_URL}] ${message}` 
       : message;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash-latest", // Most universal alias for personal keys
+      model: "gemini-3-flash-preview",
       contents: [
         ...history,
         { role: 'user', parts: [{ text: contextMessage }] }
       ],
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        // Removing tools temporarily to isolate the connection issue
+        tools: [
+          { googleSearch: {} } // Re-enabling the "eyes" of the app
+        ],
       },
     });
 
     return response;
   } catch (error: any) {
     console.error("Error calling Gemini:", error);
-    // Return a more descriptive error if possible
-    throw new Error(error.message || "An unknown error occurred while contacting the AI.");
+    throw new Error(error.message || "An unknown error occurred.");
   }
 }
